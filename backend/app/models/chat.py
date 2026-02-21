@@ -1,29 +1,49 @@
 # ─────────────────────────────────────────────
 # app/models/chat.py
 #
-# PURPOSE: All request/response schemas live here.
-# Pydantic models validate input and auto-document
-# the API in Swagger.
+# PURPOSE: Pydantic models (schemas) for request/response
+# validation. These are the "contracts" between
+# frontend ↔ backend and backend ↔ Ollama.
+#
+# Keeping models in their own file means:
+# - Routes import from here (no circular deps)
+# - Easy to version (v1 models, v2 models, etc.)
 # ─────────────────────────────────────────────
 
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import Literal, Optional
+import datetime
 
 
+# ── Shared Message shape ──────────────────────
 class Message(BaseModel):
-    """A single message in the conversation history."""
-    role: str       # "user" or "assistant"
-    content: str    # The message text
+    role: Literal["user", "assistant"]   # strict — only these two values allowed
+    content: str = Field(..., min_length=1)
+    timestamp: str = Field(
+        default_factory=lambda: datetime.datetime.now().isoformat()
+    )
 
 
+# ── Incoming request from React frontend ──────
 class ChatRequest(BaseModel):
-    """Request body for POST /api/v1/chat"""
-    message: str                    # New user message
-    history: list[Message] = []     # Full conversation so far (optional)
+    message: str = Field(..., min_length=1, description="User's new message")
+    history: list[Message] = Field(
+        default=[],
+        description="Full conversation history so far"
+    )
 
 
+# ── Outgoing response to React frontend ───────
 class ChatResponse(BaseModel):
-    """Response body for POST /api/v1/chat"""
-    reply: str              # Assistant's response
-    timestamp: str          # ISO 8601 timestamp
-    model: str              # Which model generated this
+    reply: str
+    timestamp: str
+    model: str                           # which Ollama model responded
+
+
+# ── Health check response ─────────────────────
+class HealthResponse(BaseModel):
+    status: str
+    ollama: str
+    active_model: str
+    available_models: list[str] = []
+    hint: Optional[str] = None
