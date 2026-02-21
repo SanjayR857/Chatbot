@@ -14,7 +14,7 @@ export const api = {
    * Returns bot's reply
    */
   sendMessage: async (payload: ChatRequest): Promise<ChatResponse> => {
-    const response = await fetch(`${BASE_URL}/chat`, {
+    const response = await fetch(`${BASE_URL}/api/chat`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",   // Tell server we're sending JSON
@@ -36,7 +36,7 @@ export const api = {
    * Check if the backend is reachable
    */
   healthCheck: async (): Promise<{ status: string }> => {
-    const response = await fetch(`${BASE_URL}/health`);
+    const response = await fetch(`${BASE_URL}/api/health`);
     return response.json();
   },
 

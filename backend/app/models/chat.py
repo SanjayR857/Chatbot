@@ -1,7 +1,7 @@
 # ─────────────────────────────────────────────
 # app/models/chat.py
 #
-# PURPOSE: Pydantic models (schemas) for request/response
+# PURPOSE: Pydantic models (schemas) for request/Response
 # validation. These are the "contracts" between
 # frontend ↔ backend and backend ↔ Ollama.
 #
@@ -33,17 +33,17 @@ class ChatRequest(BaseModel):
     )
 
 
-# ── Outgoing response to React frontend ───────
+# ── Outgoing Response to React frontend ───────
 class ChatResponse(BaseModel):
     reply: str
     timestamp: str
     model: str                           # which Ollama model responded
 
 
-# ── Health check response ─────────────────────
+# ── Health check Response ─────────────────────
 class HealthResponse(BaseModel):
     status: str
     ollama: str
     active_model: str
     available_models: list[str] = []
-    hint: Optional[str] = None
+    #hint: Optional[str] = None

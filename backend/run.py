@@ -4,7 +4,7 @@ from app.core.config import settings
 if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",   # "filename:variable" — points to the FastAPI instance
-        host="0.0.0.0",   # 0.0.0.0 = accept connections from any device on network
+        host="127.0.0.1",   # 0.0.0.0 = accept connections from any device on network
                           # use "127.0.0.1" to only allow your own machine
         port=8000,        # the port your API runs on
         reload=settings.DEBUG,   # reads DEBUG from .env
