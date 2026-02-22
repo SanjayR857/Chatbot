@@ -18,15 +18,48 @@ from app.core.config import settings
 # ── Password hashing ──────────────────────────
 # bcrypt automatically salts + hashes passwords.
 # NEVER store plain-text passwords.
+#
+# ⚠️  BCRYPT 72-BYTE LIMIT FIX:
+# bcrypt silently truncates OR raises ValueError
+# for passwords longer than 72 bytes.
+# Solution: pre-hash with SHA-256 (32 bytes output)
+# BEFORE passing to bcrypt → no truncation ever.
+#
+# Flow:  plain_password
+#           → SHA-256 (hex digest = 64 chars, always < 72 bytes)
+#           → bcrypt hash  (stored in DB)
+#
+# This is a well-known pattern called "pepper + prehash"
+# and is safe as long as you do the same on verify.
+
+import hashlib
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
+def _prehash(plain: str) -> str:
+    """
+    SHA-256 pre-hash to avoid bcrypt's 72-byte limit.
+    Always produces a 64-char hex string — well within limit.
+    """
+    return hashlib.sha256(plain.encode("utf-8")).hexdigest()
+
+
 def hash_password(plain: str) -> str:
-    """Hash a plain-text password → bcrypt hash string"""
-    return pwd_context.hash(plain)
+    """
+    Hash a plain-text password safely:
+      1. SHA-256 → 64-char hex  (bypasses bcrypt 72-byte limit)
+      2. bcrypt  → stored hash
+    """
+    return pwd_context.hash(_prehash(plain))
+
 
 def verify_password(plain: str, hashed: str) -> bool:
-    """Compare plain password against stored hash"""
-    return pwd_context.verify(plain, hashed)
+    """
+    Verify plain password against stored bcrypt hash.
+    Must prehash the same way as hash_password().
+    """
+    return pwd_context.verify(_prehash(plain), hashed)
 
 
 # ── JWT Tokens ────────────────────────────────

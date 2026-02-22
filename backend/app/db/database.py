@@ -16,10 +16,14 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
 
-# Async engine — non-blocking DB calls
+
+SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}/{settings.DB_NAME}"
+
+# Async engine — non-blocking DB calls for local PostgreSQL
 engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=settings.DEBUG,   # logs SQL queries in DEBUG mode
+    f"{settings.DB_DRIVER}://{settings.DB_USER}:{settings.DB_PASSWORD}"
+    f"@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}",
+    echo=True,             # logs SQL queries
     pool_size=10,          # max persistent connections
     max_overflow=20,       # extra connections allowed under load
 )
@@ -38,7 +42,6 @@ class Base(DeclarativeBase):
 
 # ── FastAPI Dependency ─────────────────────────
 # Used as: db: AsyncSession = Depends(get_db)
-# Automatically opens + closes a session per request
 async def get_db():
     async with AsyncSessionLocal() as session:
         try:

@@ -35,12 +35,27 @@ class Settings(BaseSettings):
     OLLAMA_TEMPERATURE: float = 0      # 0 = deterministic, 1 = creative
     OLLAMA_MAX_TOKENS: int = 4000
 
+    # __Postgres_________________________________
+    DB_USER: str =  os.getenv("DB_USER")
+    DB_PASSWORD: str =  os.getenv("DB_PASSWORD")
+    DB_HOST:str  = os.getenv("DB_HOST")
+    DB_PORT:str = os.getenv("DB_PORT")
+    DB_NAME: str  = os.getenv("DB_NAME")
+    DB_DRIVER: str  = os.getenv("DB_DRIVER")
+
+
     # ── System Prompt ─────────────────────────
     SYSTEM_PROMPT: str = (
         "You are ChatterBot, a friendly and helpful AI assistant. "
         "Keep replies concise and conversational."
     )
 
+
+    # ________ Access Token________________________
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    JWT_SECRET_KEY: str = os.getenv('JWT_SECRET_KEY')
+    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM")
+    JWT_REFRESH_TOKEN_EXPIRE_DAYS: int =  os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS")
     # Reads from a .env file automatically if present
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
