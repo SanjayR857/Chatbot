@@ -10,8 +10,8 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, T
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.database import Base          # ← updated: database not base
-
-
+import uuid
+from sqlalchemy.dialects.postgresql import UUID
 class User(Base):
     """
     users table — email + password auth only.
@@ -35,9 +35,20 @@ class User(Base):
         cascade="all, delete",
         lazy="select",
     )
-
+    sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
     def __repr__(self):
         return f"<User id={self.id} email={self.email} active={self.is_active}>"
+
+
+class Session(Base):
+    __tablename__ = "sessions"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = relationship("User", back_populates="sessions")
+    messages = relationship("Message", back_populates="session", cascade="all, delete-orphan")
 
 
 class ChatMessage(Base):
