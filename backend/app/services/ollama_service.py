@@ -14,7 +14,7 @@ import httpx
 from fastapi import HTTPException
 
 from app.core.config import settings
-from app.models.chat import Message
+from app.schemes.chat import Message
 
 
 class OllamaService:

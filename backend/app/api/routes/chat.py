@@ -9,7 +9,7 @@
 import datetime
 from fastapi import APIRouter
 
-from app.models.chat import ChatRequest, ChatResponse
+from app.schemes.chat import ChatRequest, ChatResponse
 from app.services.ollama_service import ollama_service
 from app.core.config import settings
 

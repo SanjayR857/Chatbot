@@ -11,7 +11,9 @@
 # ─────────────────────────────────────────────
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
+from dotenv import load_dotenv
+import os 
+load_dotenv()
 
 class Settings(BaseSettings):
     # ── App Info ──────────────────────────────
@@ -27,10 +29,10 @@ class Settings(BaseSettings):
     ]
 
     # ── Ollama ────────────────────────────────
-    OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "llama3"          # change to your pulled model
+    OLLAMA_BASE_URL: str = os.getenv('OLLAMA_BASE_URL')
+    OLLAMA_MODEL: str =  os.getenv('OLLAMA_MODEL')        # change to your pulled model
     OLLAMA_TIMEOUT: int = 60              # seconds before giving up
-    OLLAMA_TEMPERATURE: float = 0.7      # 0 = deterministic, 1 = creative
+    OLLAMA_TEMPERATURE: float = 0      # 0 = deterministic, 1 = creative
     OLLAMA_MAX_TOKENS: int = 4000
 
     # ── System Prompt ─────────────────────────

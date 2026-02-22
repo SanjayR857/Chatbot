@@ -16,3 +16,4 @@ api_router = APIRouter(prefix="/api")
 
 api_router.include_router(health.router)   # GET /api/v1/health
 api_router.include_router(chat.router)     # POST /api/v1/chat
+
