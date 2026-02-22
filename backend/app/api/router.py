@@ -12,7 +12,7 @@
 from fastapi import APIRouter
 from app.api.routes import chat, health, auth
 
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter(prefix="/api/v1")
 
 api_router.include_router(health.router)   # GET /api/v1/health
 api_router.include_router(chat.router)     # POST /api/v1/chat
