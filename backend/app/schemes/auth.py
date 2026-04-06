@@ -16,6 +16,7 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 from typing import Optional
 import re
+import uuid
 
 
 # ─────────────────────────────────────────────
@@ -23,13 +24,13 @@ import re
 #    Used by: POST /auth/register
 # ─────────────────────────────────────────────
 class RegisterRequest(BaseModel):
-    email: EmailStr                                    # validates email format automatically
+    email: EmailStr  # validates email format automatically
     password: str = Field(
         min_length=8,
-        max_length=128,   # safe — we SHA-256 prehash before bcrypt (no 72-byte issue)
+        max_length=128,  # safe — we SHA-256 prehash before bcrypt (no 72-byte issue)
         description="8–128 chars, must contain letter + number",
     )
-    confirm_password: str = Field(min_length=8, max_length=128)        # must match password
+    confirm_password: str = Field(min_length=8, max_length=128)  # must match password
     full_name: Optional[str] = Field(
         default=None,
         min_length=2,
@@ -108,11 +109,12 @@ class LoginRequest(BaseModel):
 #    NEVER include hashed_password here.
 # ─────────────────────────────────────────────
 class UserResponse(BaseModel):
-    id: int
+    id: uuid.UUID
     email: str
     full_name: Optional[str] = None
     is_active: bool
     is_verified: bool
+    role: str
 
     # from_attributes=True lets Pydantic read from
     # SQLAlchemy model objects directly:
@@ -126,10 +128,10 @@ class UserResponse(BaseModel):
 #    Contains both access + refresh tokens + user info
 # ─────────────────────────────────────────────
 class TokenResponse(BaseModel):
-    access_token: str                  # short-lived  (default: 60 min)
-    refresh_token: str                 # long-lived   (default: 7 days)
-    token_type: str = "bearer"         # OAuth2 standard — always "bearer"
-    user: UserResponse                 # so frontend doesn't need a 2nd request
+    access_token: str  # short-lived  (default: 60 min)
+    refresh_token: str  # long-lived   (default: 7 days)
+    token_type: str = "bearer"  # OAuth2 standard — always "bearer"
+    user: UserResponse  # so frontend doesn't need a 2nd request
 
     model_config = {
         "json_schema_extra": {
@@ -158,9 +160,7 @@ class RefreshRequest(BaseModel):
     refresh_token: str = Field(min_length=1)
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"refresh_token": "eyJhbGciOiJIUzI1NiJ9..."}
-        }
+        "json_schema_extra": {"example": {"refresh_token": "eyJhbGciOiJIUzI1NiJ9..."}}
     }
 
 
@@ -174,7 +174,7 @@ class ChangePasswordRequest(BaseModel):
     current_password: str = Field(min_length=1)
     new_password: str = Field(
         min_length=8,
-        max_length=128,   # safe — SHA-256 prehash before bcrypt
+        max_length=128,  # safe — SHA-256 prehash before bcrypt
     )
     confirm_new_password: str = Field(min_length=8, max_length=128)
 
@@ -225,11 +225,7 @@ class UpdateProfileRequest(BaseModel):
     def strip_name(cls, v: str) -> str:
         return v.strip()
 
-    model_config = {
-        "json_schema_extra": {
-            "example": {"full_name": "Jane Doe"}
-        }
-    }
+    model_config = {"json_schema_extra": {"example": {"full_name": "Jane Doe"}}}
 
 
 # ─────────────────────────────────────────────
@@ -241,7 +237,5 @@ class MessageResponse(BaseModel):
     message: str
 
     model_config = {
-        "json_schema_extra": {
-            "example": {"message": "Operation successful"}
-        }
+        "json_schema_extra": {"example": {"message": "Operation successful"}}
     }

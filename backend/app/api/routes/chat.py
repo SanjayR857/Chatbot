@@ -4,11 +4,12 @@
 # ─────────────────────────────────────────────
 
 import datetime
+import uuid
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db                  # ← updated
-from app.models.models import User, ChatMessage     # ← updated
+from app.db.database import get_db  # ← updated
+from app.models.models import User, ChatMessage  # ← updated
 from app.schemes.chat import ChatRequest, ChatResponse
 from app.services.ollama_service import ollama_service
 from app.core.config import settings
@@ -27,7 +28,7 @@ async def send_message(
     reply = await ollama_service.generate_reply(request.message, request.history)
     timestamp = datetime.datetime.now().isoformat()
 
-    db.add(ChatMessage(user_id=current_user.id, role="user",      content=request.message))
+    db.add(ChatMessage(user_id=current_user.id, role="user", content=request.message))
     db.add(ChatMessage(user_id=current_user.id, role="assistant", content=reply))
 
     return ChatResponse(reply=reply, timestamp=timestamp, model=settings.OLLAMA_MODEL)
@@ -46,7 +47,8 @@ async def clear_chat(
 # ── inline helper (avoids circular import) ────
 from sqlalchemy import delete as sql_delete
 
-async def user_service_chat_clear(db: AsyncSession, user_id: int) -> int:
+
+async def user_service_chat_clear(db: AsyncSession, user_id: uuid.UUID) -> int:
     result = await db.execute(
         sql_delete(ChatMessage).where(ChatMessage.user_id == user_id)
     )

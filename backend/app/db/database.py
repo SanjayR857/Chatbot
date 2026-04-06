@@ -14,18 +14,12 @@
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from app.core.config import settings
 
+SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./chatbot.db"
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.DB_USER}:{settings.DB_PASSWORD}@{settings.DB_HOST}/{settings.DB_NAME}"
-
-# Async engine — non-blocking DB calls for local PostgreSQL
 engine = create_async_engine(
-    f"{settings.DB_DRIVER}://{settings.DB_USER}:{settings.DB_PASSWORD}"
-    f"@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}",
-    echo=True,             # logs SQL queries
-    pool_size=10,          # max persistent connections
-    max_overflow=20,       # extra connections allowed under load
+    SQLALCHEMY_DATABASE_URL,
+    echo=True,
 )
 
 # Session factory
@@ -34,6 +28,7 @@ AsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,  # objects stay usable after commit
 )
+
 
 # Base class all models inherit from
 class Base(DeclarativeBase):

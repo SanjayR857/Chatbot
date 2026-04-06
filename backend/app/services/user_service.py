@@ -19,25 +19,23 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from fastapi import HTTPException, status
+import uuid
 
 from app.models.models import User, ChatMessage
 from app.core.security import hash_password, verify_password
 
 
 class UserService:
-
     # ─────────────────────────────────────────
     # READ
     # ─────────────────────────────────────────
 
-    async def get_by_id(self, db: AsyncSession, user_id: int) -> User | None:
+    async def get_by_id(self, db: AsyncSession, user_id: uuid.UUID) -> User | None:
         """
         Fetch a single user by their primary key ID.
         Returns None if not found (caller decides how to handle).
         """
-        result = await db.execute(
-            select(User).where(User.id == user_id)
-        )
+        result = await db.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
 
     async def get_by_email(self, db: AsyncSession, email: str) -> User | None:
@@ -51,7 +49,7 @@ class UserService:
         )
         return result.scalar_one_or_none()
 
-    async def get_by_id_or_404(self, db: AsyncSession, user_id: int) -> User:
+    async def get_by_id_or_404(self, db: AsyncSession, user_id: uuid.UUID) -> User:
         """
         Fetch user by ID — raises 404 if not found.
         Use this when the user MUST exist (e.g. admin routes).
@@ -110,7 +108,7 @@ class UserService:
 
         # 4. Persist
         db.add(user)
-        await db.flush()   # writes to DB in current transaction, gets auto-generated id
+        await db.flush()  # writes to DB in current transaction, gets auto-generated id
         await db.refresh(user)  # reload from DB to get created_at etc.
         return user
 
@@ -237,7 +235,7 @@ class UserService:
         await db.delete(user)
         await db.flush()
 
-    async def clear_chat_history(self, db: AsyncSession, user_id: int) -> int:
+    async def clear_chat_history(self, db: AsyncSession, user_id: uuid.UUID) -> int:
         """
         Delete all chat messages for a user.
         Returns the number of messages deleted.
@@ -246,7 +244,7 @@ class UserService:
             delete(ChatMessage).where(ChatMessage.user_id == user_id)
         )
         await db.flush()
-        return result.rowcount   # number of rows deleted
+        return result.rowcount  # number of rows deleted
 
 
 # ─────────────────────────────────────────────

@@ -8,6 +8,6 @@ sqlalchemy
 asyncpg
 passlib
 python-jose[cryptography]
-pip install pydantic[email]
-pip install email-validator
+pydantic[email]
+email-validator
 bcrypt==3.2.2

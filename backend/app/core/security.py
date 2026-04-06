@@ -14,6 +14,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from app.core.config import settings
+import uuid
 
 # ── Password hashing ──────────────────────────
 # bcrypt automatically salts + hashes passwords.
@@ -68,7 +69,8 @@ def verify_password(plain: str, hashed: str) -> bool:
 # Payload contains: user_id, expiry, token type
 # Signature ensures nobody tampered with the payload
 
-def create_access_token(user_id: int) -> str:
+
+def create_access_token(user_id: uuid.UUID) -> str:
     """
     Creates a short-lived JWT (default: 60 min).
     Sent with every API request in Authorization header.
@@ -77,14 +79,16 @@ def create_access_token(user_id: int) -> str:
         minutes=settings.JWT_ACCESS_TOKEN_EXPIRE_MINUTES
     )
     payload = {
-        "sub": str(user_id),   # subject = who this token belongs to
-        "exp": expire,          # expiry timestamp
+        "sub": str(user_id),  # subject = who this token belongs to
+        "exp": expire,  # expiry timestamp
         "type": "access",
     }
-    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return jwt.encode(
+        payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+    )
 
 
-def create_refresh_token(user_id: int) -> str:
+def create_refresh_token(user_id: uuid.UUID) -> str:
     """
     Creates a long-lived JWT (default: 7 days).
     Used to get a new access token without re-login.
@@ -97,7 +101,9 @@ def create_refresh_token(user_id: int) -> str:
         "exp": expire,
         "type": "refresh",
     }
-    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return jwt.encode(
+        payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
+    )
 
 
 def decode_token(token: str) -> dict:

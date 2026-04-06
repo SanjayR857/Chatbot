@@ -9,8 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.api.router import api_router
-from app.db.database import engine, Base            # ← updated: database not base
-from app.models import models                       # ← import so SQLAlchemy sees the tables
+from app.db.database import engine, Base  # ← updated: database not base
+from app.models import models  # ← import so SQLAlchemy sees the tables
 
 
 @asynccontextmanager
@@ -18,10 +18,10 @@ async def lifespan(app: FastAPI):
     """Auto-create all DB tables on startup."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    print("✅ Database tables created/verified")
+    print("[OK] Database tables created/verified")
     yield
     await engine.dispose()
-    print("🔌 Database connections closed")
+    print("[DB] Database connections closed")
 
 
 def create_app() -> FastAPI:
@@ -45,6 +45,7 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
 
     from app.api.routes.health import root
+
     app.get("/")(root)
 
     return app

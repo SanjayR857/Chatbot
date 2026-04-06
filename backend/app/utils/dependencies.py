@@ -9,6 +9,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
 
 from app.db.database import get_db
 from app.models.models import User
@@ -34,9 +35,10 @@ async def get_current_user(
       3. Look up user in DB
       4. Return user object (or raise 401/403)
     """
-    payload = decode_token(token)       # raises 401 if invalid/expired
+    payload = decode_token(token)  # raises 401 if invalid/expired
 
     user_id = payload.get("sub")
+
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -44,13 +46,15 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = await user_service.get_by_id(db, int(user_id))
+    user = await user_service.get_by_id(db, uuid.UUID(user_id))
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
